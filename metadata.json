@@ -1,0 +1,10 @@
+{
+   "shell-version": ["3.0"],
+   "version": "0.1",
+   "uuid": "gnome-shell-trash-extension",
+   "name": "Trash Extension",
+   "description": "A Trash button for the GNOME shell panel",
+   "url": "https://github.com/bertoldia/gnome-shell-trash-extension",
+   "localedir": "locale",
+   "original-authors": "Axel von Bertoldi"
+}
