@@ -1,0 +1,7 @@
+A minimalist Trash management extension for the Gnome Shell.
+
+Allows you to empty and open the Trash folder. Hides completely when the Trash
+is empty.
+
+To install, copy the folder to ~/.local/share/gnome-shell/extensions/ and
+restart the shell.
