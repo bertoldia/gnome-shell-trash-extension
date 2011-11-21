@@ -26,26 +26,27 @@ const Gio = imports.gi.Gio;
 const Gtk = imports.gi.Gtk;
 const Lang = imports.lang;
 
-const Gettext = imports.gettext;
+const Gettext = imports.gettext.domain('gnome-shell-extensions');
 const _ = Gettext.gettext;
 
-const MYPLACES_ICON_SIZE = 24;
-
-function PopupMenuItem() {
-    this._init.apply(this, arguments);
+function PopupMenuItem(label, icon, callback) {
+    this._init(label, icon, callback);
 }
 
 PopupMenuItem.prototype = {
     __proto__: PopupMenu.PopupBaseMenuItem.prototype,
 
-    _init: function(text, icon, params) {
-        PopupMenu.PopupBaseMenuItem.prototype._init.call(this, params);
+    _init: function(text, icon, callback) {
+        PopupMenu.PopupBaseMenuItem.prototype._init.call(this);
+
         this.icon = new St.Icon({ icon_name: icon,
                                   icon_type: St.IconType.FULLCOLOR,
-                                  style_class: 'system-status-icon' });
+                                  style_class: 'popup-menu-icon' });
         this.addActor(this.icon);
         this.label = new St.Label({ text: text });
         this.addActor(this.label);
+
+        this.connect('activate', callback);
     }
 };
 
@@ -54,34 +55,23 @@ function TrashButton() {
 }
 
 TrashButton.prototype = {
-    __proto__: PanelMenu.Button.prototype,
+    __proto__: PanelMenu.SystemStatusButton.prototype,
 
     _init: function() {
-        PanelMenu.Button.prototype._init.call(this, 0.0);
+        PanelMenu.SystemStatusButton.prototype._init.call(this, 'user-trash');
 
         this.trash_path = 'trash:///';
-
         this.trash_file = Gio.file_new_for_uri(this.trash_path);
 
-        //this.trash_empty_icon = new St.Icon({ icon_name: 'trashcan_empty',
-                                              //icon_type: St.IconType.FULLCOLOR,
-                                              //style_class: 'system-status-icon' });
-        this.trash_full_icon = new St.Icon({ icon_name: 'trashcan_full',
-                                             icon_type: St.IconType.FULLCOLOR,
-                                             style_class: 'system-status-icon' });
-        this.actor.set_child(this.trash_full_icon);
-
-        this.empty_item = new PopupMenuItem(_('Empty Trash'), Gtk.STOCK_REMOVE);
-        this.empty_item.connect('activate', Lang.bind(this, this._emptyTrash));
+        this.empty_item = new PopupMenuItem(_('Empty Trash'),
+                                            Gtk.STOCK_REMOVE,
+                                            Lang.bind(this, this._emptyTrash));
         this.menu.addMenuItem(this.empty_item);
 
-        this.open_item = new PopupMenuItem(_('Open Trash'), Gtk.STOCK_OPEN);
-        this.open_item.connect('activate', Lang.bind(this, this._openTrash));
+        this.open_item = new PopupMenuItem(_('Open Trash'),
+                                           Gtk.STOCK_OPEN,
+                                           Lang.bind(this, this._openTrash));
         this.menu.addMenuItem(this.open_item);
-
-        let children = Main.panel._rightBox.get_children();
-        Main.panel._rightBox.insert_actor(this.actor, children.length - 1);
-        Main.panel._menus.addMenu(this.menu);
 
         this._onTrashChange();
         this._setupWatch();
@@ -99,11 +89,10 @@ TrashButton.prototype = {
     _onTrashChange: function() {
       let children = this.trash_file.enumerate_children('*', 0, null, null);
       if (children.next_file(null, null) == null) {
-          //this.actor.set_child(this.trash_empty_icon);
-          this.actor.hide();
+          this.actor.visible = false;
       } else {
-          //this.actor.set_child(this.trash_full_icon);
           this.actor.show();
+          this.actor.visible = true;
       }
     },
 
@@ -117,9 +106,17 @@ TrashButton.prototype = {
     }
 };
 
-function main(extensionMeta) {
-    let userExtensionLocalePath = extensionMeta.localedir;
-    Gettext.bindtextdomain('trash_button', userExtensionLocalePath);
-    Gettext.textdomain('trash_button');
-    new TrashButton();
+function init(metadata) {
+  imports.gettext.bindtextdomain('gnome-shell-extensions', metadata.localedir);
+}
+
+let _indicator;
+
+function enable() {
+  _indicator = new TrashButton;
+  Main.panel.addToStatusArea('trash_button', _indicator);
+}
+
+function disable() {
+  _indicator.destroy();
 }
