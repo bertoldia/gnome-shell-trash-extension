@@ -22,12 +22,15 @@ const St = imports.gi.St;
 const Main = imports.ui.main;
 const PopupMenu = imports.ui.popupMenu;
 const PanelMenu = imports.ui.panelMenu;
+const ModalDialog = imports.ui.modalDialog;
 const Gio = imports.gi.Gio;
 const Gtk = imports.gi.Gtk;
 const Lang = imports.lang;
+const Clutter = imports.gi.Clutter;
 
 const Gettext = imports.gettext.domain('gnome-shell-extensions');
 const _ = Gettext.gettext;
+
 
 function PopupMenuItem(label, icon, callback) {
     this._init(label, icon, callback);
@@ -65,19 +68,19 @@ TrashButton.prototype = {
 
         this.empty_item = new PopupMenuItem(_('Empty Trash'),
                                             Gtk.STOCK_REMOVE,
-                                            Lang.bind(this, this._emptyTrash));
+                                            Lang.bind(this, this._onEmptyTrash));
         this.menu.addMenuItem(this.empty_item);
 
         this.open_item = new PopupMenuItem(_('Open Trash'),
                                            Gtk.STOCK_OPEN,
-                                           Lang.bind(this, this._openTrash));
+                                           Lang.bind(this, this._onOpenTrash));
         this.menu.addMenuItem(this.open_item);
 
         this._onTrashChange();
         this._setupWatch();
     },
 
-    _openTrash: function() {
+    _onOpenTrash: function() {
         Gio.app_info_launch_default_for_uri(this.trash_path, null);
     },
 
@@ -96,7 +99,11 @@ TrashButton.prototype = {
       }
     },
 
-    _emptyTrash: function() {
+    _onEmptyTrash: function() {
+      new ConfirmEmptyTrashDialog(Lang.bind(this, this._doEmptyTrash)).open();
+    },
+
+    _doEmptyTrash: function() {
       let children = this.trash_file.enumerate_children('*', 0, null, null);
       let child_info = null;
       while ((child_info = children.next_file(null, null)) != null) {
@@ -104,6 +111,56 @@ TrashButton.prototype = {
         child.delete(null);
       }
     }
+};
+
+const MESSAGE = _("Are you sure you want to delete all items from the trash?\n\
+This operation cannot be undone.");
+
+function ConfirmEmptyTrashDialog(emptyMethod) {
+  this._init(emptyMethod);
+}
+
+ConfirmEmptyTrashDialog.prototype = {
+  __proto__: ModalDialog.ModalDialog.prototype,
+
+  _init: function(emptyMethod) {
+    ModalDialog.ModalDialog.prototype._init.call(this, { styleClass: null });
+
+    let mainContentBox = new St.BoxLayout({ style_class: 'polkit-dialog-main-layout',
+                                            vertical: false });
+    this.contentLayout.add(mainContentBox, { x_fill: true, y_fill: true });
+
+    let messageBox = new St.BoxLayout({ style_class: 'polkit-dialog-message-layout',
+                                        vertical: true });
+    mainContentBox.add(messageBox, { y_align: St.Align.START });
+
+    this._subjectLabel = new St.Label({ style_class: 'polkit-dialog-headline',
+                                        text: _("Empty Trash?") });
+
+    messageBox.add(this._subjectLabel, { y_fill:  false, y_align: St.Align.START });
+
+    this._descriptionLabel = new St.Label({ style_class: 'polkit-dialog-description',
+                                            text: Gettext.gettext(MESSAGE) });
+
+    messageBox.add(this._descriptionLabel, { y_fill:  true, y_align: St.Align.START });
+
+    this.setButtons([
+      {
+        label: _("Cancel"),
+        action: Lang.bind(this, function() {
+          this.close();
+        }),
+        key: Clutter.Escape
+      },
+      {
+        label: _("Empty"),
+        action: Lang.bind(this, function() {
+          this.close();
+          emptyMethod();
+        })
+      }
+    ]);
+  }
 };
 
 function init(metadata) {
