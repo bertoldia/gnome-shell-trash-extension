@@ -163,8 +163,8 @@ ConfirmEmptyTrashDialog.prototype = {
   }
 };
 
-function init(metadata) {
-  imports.gettext.bindtextdomain('gnome-shell-extensions', metadata.localedir);
+function init() {
+  //
 }
 
 let _indicator;
