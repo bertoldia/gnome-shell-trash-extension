@@ -76,6 +76,9 @@ TrashButton.prototype = {
                                            Lang.bind(this, this._onOpenTrash));
         this.menu.addMenuItem(this.open_item);
 
+        this.separator = new PopupMenu.PopupSeparatorMenuItem();
+        this.menu.addMenuItem(this.separator);
+
         this._onTrashChange();
         this._setupWatch();
     },
@@ -90,8 +93,8 @@ TrashButton.prototype = {
     },
 
     _onTrashChange: function() {
-      let children = this.trash_file.enumerate_children('*', 0, null, null);
-      if (children.next_file(null, null) == null) {
+      this._clearMenu();
+      if (this._listFilesInTrash() == 0) {
           this.actor.visible = false;
       } else {
           this.actor.show();
@@ -109,6 +112,29 @@ TrashButton.prototype = {
       while ((child_info = children.next_file(null, null)) != null) {
         let child = this.trash_file.get_child(child_info.get_name());
         child.delete(null);
+      }
+    },
+
+    _listFilesInTrash: function() {
+      let children = this.trash_file.enumerate_children('*', 0, null, null);
+      let count  = 0;
+      let file_info = null;
+      while ((file_info = children.next_file(null, null)) != null) {
+        let item = new PopupMenu.PopupBaseMenuItem()
+        item.addActor(new St.Label({ text: file_info.get_name() }));
+        this.menu.addMenuItem(item);
+        count++;
+      }
+      children.close(null, null)
+      return count;
+    },
+
+    _clearMenu: function() {
+      let existing = this.menu._getMenuItems();
+      let i = existing.length - 1;
+      while(i > 2) {
+        existing[i].destroy();
+        i--;
       }
     }
 };
