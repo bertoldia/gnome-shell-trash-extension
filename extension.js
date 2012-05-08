@@ -28,9 +28,8 @@ const Gtk = imports.gi.Gtk;
 const Lang = imports.lang;
 const Clutter = imports.gi.Clutter;
 
-const Gettext = imports.gettext.domain('gnome-shell-extensions');
+const Gettext = imports.gettext.domain("gnome-shell-trash-extension");
 const _ = Gettext.gettext;
-
 
 function PopupMenuItem(label, icon, callback) {
     this._init(label, icon, callback);
@@ -66,12 +65,12 @@ TrashButton.prototype = {
         this.trash_path = 'trash:///';
         this.trash_file = Gio.file_new_for_uri(this.trash_path);
 
-        this.empty_item = new PopupMenuItem(_('Empty Trash'),
+        this.empty_item = new PopupMenuItem(_("Empty Trash"),
                                             Gtk.STOCK_REMOVE,
                                             Lang.bind(this, this._onEmptyTrash));
         this.menu.addMenuItem(this.empty_item);
 
-        this.open_item = new PopupMenuItem(_('Open Trash'),
+        this.open_item = new PopupMenuItem(_("Open Trash"),
                                            Gtk.STOCK_OPEN,
                                            Lang.bind(this, this._onOpenTrash));
         this.menu.addMenuItem(this.open_item);
@@ -189,8 +188,8 @@ ConfirmEmptyTrashDialog.prototype = {
   }
 };
 
-function init() {
-  //
+function init(extensionMeta) {
+    imports.gettext.bindtextdomain("gnome-shell-trash-extension", extensionMeta.path + "/locale");
 }
 
 let _indicator;
