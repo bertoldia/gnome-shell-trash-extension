@@ -120,6 +120,7 @@ TrashButton.prototype = {
       let file_info = null;
       while ((file_info = children.next_file(null, null)) != null) {
         let item = new PopupMenu.PopupBaseMenuItem()
+        item.addActor(new St.Label({ text: "/" }));
         item.addActor(new St.Label({ text: file_info.get_name() }));
         this.menu.addMenuItem(item);
         count++;
