@@ -120,6 +120,10 @@ TrashButton.prototype = {
       let file_info = null;
       while ((file_info = children.next_file(null, null)) != null) {
         let item = new PopupMenu.PopupBaseMenuItem()
+        let icon = new St.Icon({ gicon: file_info.get_icon(),
+                                 icon_type: St.IconType.FULLCOLOR,
+                                 style_class: 'popup-menu-icon' });
+        item.addActor(icon);
         item.addActor(new St.Label({ text: file_info.get_name() }));
         this.menu.addMenuItem(item);
         count++;
