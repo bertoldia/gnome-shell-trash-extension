@@ -87,14 +87,9 @@ TrashButton.prototype = {
         this.separator = new PopupMenu.PopupSeparatorMenuItem();
         this.menu.addMenuItem(this.separator);
 
-        let currentMode = settings.get_boolean(SETTINGS_SHOWFILES_KEY);
-        if (currentMode == true) {
-      
-		this._onTrashChange();
-		this._setupWatch();
+	this._onTrashChange();
+	this._setupWatch();
 		
-	}
-        	
     },
 
     _onOpenTrash: function() {
@@ -133,14 +128,23 @@ TrashButton.prototype = {
 
     _listFilesInTrash: function() {
 
+      let currentMode = settings.get_boolean(SETTINGS_SHOWFILES_KEY);
+      
       let children = this.trash_file.enumerate_children('*', 0, null, null);
       let count  = 0;
       let file_info = null;
       while ((file_info = children.next_file(null, null)) != null) {
-	let item = new PopupMenu.PopupBaseMenuItem()
-	item.addActor(new St.Label({ text: file_info.get_name() }));
-	this.menu.addMenuItem(item);
+
+	if (currentMode == true) {
+	
+		let item = new PopupMenu.PopupBaseMenuItem()
+		item.addActor(new St.Label({ text: file_info.get_name() }));
+		this.menu.addMenuItem(item);
+		
+	}
+	
 	count++;
+	
       }
       children.close(null, null)
       return count;
