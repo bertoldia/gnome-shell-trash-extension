@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="gnome-shell-extensions">
+  <schema path="/org/gnome/shell/extensions/trash/" id="org.gnome.shell.extensions.trash">
+    <key type="b" name="showfiles">
+      <default>true</default>
+      <summary>Show files</summary>
+      <description>Show the files stored in the trash in popup menu.</description>
+    </key>
+  </schema>
+</schemalist>
