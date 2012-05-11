@@ -28,8 +28,16 @@ const Gtk = imports.gi.Gtk;
 const Lang = imports.lang;
 const Clutter = imports.gi.Clutter;
 
-const Gettext = imports.gettext.domain("gnome-shell-trash-extension");
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
+const Convenience = Me.imports.convenience;
+
+const Gettext = imports.gettext.domain('gnome-shell-extensions');
 const _ = Gettext.gettext;
+
+const SETTINGS_SHOWFILES_KEY = 'showfiles';
+let settings;
+
 
 function PopupMenuItem(label, icon, callback) {
     this._init(label, icon, callback);
@@ -62,13 +70,14 @@ TrashButton.prototype = {
     _init: function() {
         PanelMenu.SystemStatusButton.prototype._init.call(this, 'user-trash');
 
-        this.trash_path = 'trash:///';
+	this.trash_path = 'trash:///';
         this.trash_file = Gio.file_new_for_uri(this.trash_path);
 
         this.empty_item = new PopupMenuItem(_("Empty Trash"),
                                             Gtk.STOCK_REMOVE,
                                             Lang.bind(this, this._onEmptyTrash));
         this.menu.addMenuItem(this.empty_item);
+
 
         this.open_item = new PopupMenuItem(_("Open Trash"),
                                            Gtk.STOCK_OPEN,
@@ -78,8 +87,9 @@ TrashButton.prototype = {
         this.separator = new PopupMenu.PopupSeparatorMenuItem();
         this.menu.addMenuItem(this.separator);
 
-        this._onTrashChange();
-        this._setupWatch();
+	this._onTrashChange();
+	this._setupWatch();
+		
     },
 
     _onOpenTrash: function() {
@@ -93,12 +103,14 @@ TrashButton.prototype = {
 
     _onTrashChange: function() {
       this._clearMenu();
+      
       if (this._listFilesInTrash() == 0) {
-          this.actor.visible = false;
+	  this.actor.visible = false;
       } else {
-          this.actor.show();
-          this.actor.visible = true;
+	  this.actor.show();
+	  this.actor.visible = true;
       }
+	      
     },
 
     _onEmptyTrash: function() {
@@ -115,21 +127,28 @@ TrashButton.prototype = {
     },
 
     _listFilesInTrash: function() {
+
+      let currentMode = settings.get_boolean(SETTINGS_SHOWFILES_KEY);
+      
       let children = this.trash_file.enumerate_children('*', 0, null, null);
       let count  = 0;
       let file_info = null;
       while ((file_info = children.next_file(null, null)) != null) {
-        let item = new PopupMenu.PopupBaseMenuItem()
-        let icon = new St.Icon({ gicon: file_info.get_icon(),
-                                 icon_type: St.IconType.FULLCOLOR,
-                                 style_class: 'popup-menu-icon' });
-        item.addActor(icon);
-        item.addActor(new St.Label({ text: file_info.get_name() }));
-        this.menu.addMenuItem(item);
-        count++;
+
+	if (currentMode == true) {
+	
+		let item = new PopupMenu.PopupBaseMenuItem()
+		item.addActor(new St.Label({ text: file_info.get_name() }));
+		this.menu.addMenuItem(item);
+		
+	}
+	
+	count++;
+	
       }
       children.close(null, null)
       return count;
+	      
     },
 
     _clearMenu: function() {
@@ -192,8 +211,9 @@ ConfirmEmptyTrashDialog.prototype = {
   }
 };
 
-function init(extensionMeta) {
-    imports.gettext.bindtextdomain("gnome-shell-trash-extension", extensionMeta.path + "/locale");
+function init() {
+    Convenience.initTranslations();
+    settings = Convenience.getSettings();
 }
 
 let _indicator;
