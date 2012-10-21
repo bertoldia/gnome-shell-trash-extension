@@ -42,7 +42,6 @@ PopupMenuItem.prototype = {
         PopupMenu.PopupBaseMenuItem.prototype._init.call(this);
 
         this.icon = new St.Icon({ icon_name: icon,
-                                  icon_type: St.IconType.FULLCOLOR,
                                   style_class: 'popup-menu-icon' });
         this.addActor(this.icon);
         this.label = new St.Label({ text: text });
