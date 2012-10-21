@@ -42,7 +42,6 @@ PopupMenuItem.prototype = {
         PopupMenu.PopupBaseMenuItem.prototype._init.call(this);
 
         this.icon = new St.Icon({ icon_name: icon,
-                                  icon_type: St.IconType.FULLCOLOR,
                                   style_class: 'popup-menu-icon' });
         this.addActor(this.icon);
         this.label = new St.Label({ text: text });
@@ -121,7 +120,6 @@ TrashButton.prototype = {
       while ((file_info = children.next_file(null, null)) != null) {
         let item = new PopupMenu.PopupBaseMenuItem()
         let icon = new St.Icon({ gicon: file_info.get_icon(),
-                                 icon_type: St.IconType.FULLCOLOR,
                                  style_class: 'popup-menu-icon' });
         item.addActor(icon);
         item.addActor(new St.Label({ text: file_info.get_name() }));
