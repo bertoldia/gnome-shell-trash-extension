@@ -1,5 +1,5 @@
 {
-   "shell-version": ["3.6"],
+   "shell-version": ["3.8", "3.6"],
    "version": "0.3",
    "uuid": "gnome-shell-trash-extension",
    "name": "Trash",
