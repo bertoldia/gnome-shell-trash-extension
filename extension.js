@@ -31,54 +31,64 @@ const Clutter = imports.gi.Clutter;
 const Gettext = imports.gettext.domain("gnome-shell-trash-extension");
 const _ = Gettext.gettext;
 
-function PopupMenuItem(label, icon, callback) {
-    this._init(label, icon, callback);
-}
 
-PopupMenuItem.prototype = {
-    __proto__: PopupMenu.PopupBaseMenuItem.prototype,
+const TrashMenuItem = new Lang.Class({
+    Name: 'TrashMenuItem.TrashMenuItem',
+    Extends: PopupMenu.PopupBaseMenuItem,
 
     _init: function(text, icon, callback) {
-        PopupMenu.PopupBaseMenuItem.prototype._init.call(this);
+        this.parent(0.0, text);
 
         this.icon = new St.Icon({ icon_name: icon,
                                   style_class: 'popup-menu-icon' });
-        this.addActor(this.icon);
+        this.actor.add_child(this.icon);
         this.label = new St.Label({ text: text });
-        this.addActor(this.label);
+        this.actor.add_child(this.label);
 
         this.connect('activate', callback);
+    },
+
+    destroy: function() {
+        this.parent();
     }
-};
+});
 
-function TrashButton() {
-    this._init();
-}
 
-TrashButton.prototype = {
-    __proto__: PanelMenu.SystemStatusButton.prototype,
+const TrashMenu = new Lang.Class({
+    Name: 'TrashMenu.TrashMenu',
+    Extends: PanelMenu.Button,
 
     _init: function() {
-        PanelMenu.SystemStatusButton.prototype._init.call(this, 'user-trash');
+        this.parent(0.0, _("Trash"));
+        this.trashIcon = new St.Icon({ icon_name: 'user-trash',
+                                       style_class: 'popup-menu-icon' })
+      	this.actor.add_actor(this.trashIcon);
 
         this.trash_path = 'trash:///';
         this.trash_file = Gio.file_new_for_uri(this.trash_path);
 
-        this.empty_item = new PopupMenuItem(_("Empty Trash"),
+        this._addConstMenuItems();
+        this._onTrashChange();
+        this._setupWatch();
+    },
+
+    _addConstMenuItems: function() {
+        this.empty_item = new TrashMenuItem(_("Empty Trash"),
                                             Gtk.STOCK_REMOVE,
                                             Lang.bind(this, this._onEmptyTrash));
         this.menu.addMenuItem(this.empty_item);
 
-        this.open_item = new PopupMenuItem(_("Open Trash"),
+        this.open_item = new TrashMenuItem(_("Open Trash"),
                                            Gtk.STOCK_OPEN,
                                            Lang.bind(this, this._onOpenTrash));
         this.menu.addMenuItem(this.open_item);
 
         this.separator = new PopupMenu.PopupSeparatorMenuItem();
         this.menu.addMenuItem(this.separator);
+    },
 
-        this._onTrashChange();
-        this._setupWatch();
+    destroy: function() {
+        this.parent();
     },
 
     _onOpenTrash: function() {
@@ -121,8 +131,8 @@ TrashButton.prototype = {
         let item = new PopupMenu.PopupBaseMenuItem()
         let icon = new St.Icon({ gicon: file_info.get_icon(),
                                  style_class: 'popup-menu-icon' });
-        item.addActor(icon);
-        item.addActor(new St.Label({ text: file_info.get_name() }));
+        item.actor.add_child(icon);
+        item.actor.add_child(new St.Label({ text: file_info.get_name() }));
         this.menu.addMenuItem(item);
         count++;
       }
@@ -138,7 +148,7 @@ TrashButton.prototype = {
         i--;
       }
     }
-};
+});
 
 const MESSAGE = _("Are you sure you want to delete all items from the trash?\n\
 This operation cannot be undone.");
@@ -197,7 +207,7 @@ function init(extensionMeta) {
 let _indicator;
 
 function enable() {
-  _indicator = new TrashButton;
+  _indicator = new TrashMenu;
   Main.panel.addToStatusArea('trash_button', _indicator);
 }
 
