@@ -136,11 +136,13 @@ const TrashMenu = new Lang.Class({
       let count  = 0;
       let file_info = null;
       while ((file_info = children.next_file(null, null)) != null) {
-        let item = new PopupMenu.PopupBaseMenuItem()
-        let icon = new St.Icon({ gicon: file_info.get_icon(),
-                                 style_class: 'popup-menu-icon' });
-        item.actor.add_child(icon);
-        item.actor.add_child(new St.Label({ text: file_info.get_name() }));
+        let file_name  = file_info.get_name();
+        let item = new TrashMenuItem(file_info.get_display_name(),
+                                     null,
+                                     file_info.get_icon(),
+                                     Lang.bind(this, function() {
+                                       this._openTrashItem(file_name);
+                                     }));
         this.menu.addMenuItem(item);
         count++;
       }
@@ -155,6 +157,11 @@ const TrashMenu = new Lang.Class({
         existing[i].destroy();
         i--;
       }
+    },
+
+    _openTrashItem: function(file_name) {
+      file = this.trash_file.get_child(file_name);
+      Gio.app_info_launch_default_for_uri(file.get_uri(), null);
     }
 });
 
