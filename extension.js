@@ -36,11 +36,17 @@ const TrashMenuItem = new Lang.Class({
     Name: 'TrashMenuItem.TrashMenuItem',
     Extends: PopupMenu.PopupBaseMenuItem,
 
-    _init: function(text, icon, callback) {
+    _init: function(text, icon_name, gicon, callback) {
         this.parent(0.0, text);
 
-        this.icon = new St.Icon({ icon_name: icon,
-                                  style_class: 'popup-menu-icon' });
+        let icon_cfg = { style_class: 'popup-menu-icon' };
+        if (icon_name != null) {
+          icon_cfg.icon_name = icon_name;
+        } else if (gicon != null) {
+          icon_cfg.gicon = gicon;
+        }
+
+        this.icon = new St.Icon(icon_cfg);
         this.actor.add_child(this.icon);
         this.label = new St.Label({ text: text });
         this.actor.add_child(this.label);
@@ -75,11 +81,13 @@ const TrashMenu = new Lang.Class({
     _addConstMenuItems: function() {
         this.empty_item = new TrashMenuItem(_("Empty Trash"),
                                             Gtk.STOCK_REMOVE,
+                                            null,
                                             Lang.bind(this, this._onEmptyTrash));
         this.menu.addMenuItem(this.empty_item);
 
         this.open_item = new TrashMenuItem(_("Open Trash"),
                                            Gtk.STOCK_OPEN,
+                                           null,
                                            Lang.bind(this, this._onOpenTrash));
         this.menu.addMenuItem(this.open_item);
 
