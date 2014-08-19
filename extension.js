@@ -66,7 +66,7 @@ const TrashMenu = new Lang.Class({
 
     _init: function() {
         this.parent(0.0, _("Trash"));
-        this.trashIcon = new St.Icon({ icon_name: 'user-trash',
+        this.trashIcon = new St.Icon({ icon_name: 'user-trash-full-symbolic',
                                        style_class: 'popup-menu-icon' })
       	this.actor.add_actor(this.trashIcon);
 
