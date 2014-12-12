@@ -80,13 +80,13 @@ const TrashMenu = new Lang.Class({
 
     _addConstMenuItems: function() {
         this.empty_item = new TrashMenuItem(_("Empty Trash"),
-                                            Gtk.STOCK_REMOVE,
+                                            "edit-delete-symbolic",
                                             null,
                                             Lang.bind(this, this._onEmptyTrash));
         this.menu.addMenuItem(this.empty_item);
 
         this.open_item = new TrashMenuItem(_("Open Trash"),
-                                           Gtk.STOCK_OPEN,
+                                           "folder-open-symbolic",
                                            null,
                                            Lang.bind(this, this._onOpenTrash));
         this.menu.addMenuItem(this.open_item);
@@ -139,7 +139,7 @@ const TrashMenu = new Lang.Class({
         let file_name  = file_info.get_name();
         let item = new TrashMenuItem(file_info.get_display_name(),
                                      null,
-                                     file_info.get_icon(),
+                                     file_info.get_symbolic_icon(),
                                      Lang.bind(this, function() {
                                        this._openTrashItem(file_name);
                                      }));
