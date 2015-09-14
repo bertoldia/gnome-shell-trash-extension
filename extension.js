@@ -93,6 +93,21 @@ const TrashMenu = new Lang.Class({
 
         this.separator = new PopupMenu.PopupSeparatorMenuItem();
         this.menu.addMenuItem(this.separator);
+
+        this.separator = new PopupMenu.PopupSeparatorMenuItem();
+        this.menu.addMenuItem(this.separator);
+
+        // Create scrollable section
+        this.scrollSection = new PopupMenu.PopupMenuSection();
+        let scrollViewMenuSection = new PopupMenu.PopupMenuSection();
+        let trashScrollView = new St.ScrollView({
+            style_class: 'trash-scroll-menu-section',
+            overlay_scrollbars: true
+        });
+        trashScrollView.add_actor(this.scrollSection.actor);
+        scrollViewMenuSection.actor.add_actor(trashScrollView);
+
+        this.menu.addMenuItem(scrollViewMenuSection);
     },
 
     destroy: function() {
@@ -143,7 +158,7 @@ const TrashMenu = new Lang.Class({
                                      Lang.bind(this, function() {
                                        this._openTrashItem(file_name);
                                      }));
-        this.menu.addMenuItem(item);
+        this.scrollSection.addMenuItem(item);
         count++;
       }
       children.close(null, null)
@@ -151,9 +166,9 @@ const TrashMenu = new Lang.Class({
     },
 
     _clearMenu: function() {
-      let existing = this.menu._getMenuItems();
+      let existing = this.scrollSection._getMenuItems();
       let i = existing.length - 1;
-      while(i > 2) {
+      while(i >= 0) {
         existing[i].destroy();
         i--;
       }
