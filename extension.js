@@ -175,7 +175,7 @@ const TrashMenu = new Lang.Class({
     },
 
     _openTrashItem: function(file_name) {
-      file = this.trash_file.get_child(file_name);
+      let file = this.trash_file.get_child(file_name);
       Gio.app_info_launch_default_for_uri(file.get_uri(), null);
     }
 });
