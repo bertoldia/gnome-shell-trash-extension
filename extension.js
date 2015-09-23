@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Axel von Bertoldi
+ * Copyright 2011 - 2015 Axel von Bertoldi
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -30,6 +30,34 @@ const Clutter = imports.gi.Clutter;
 
 const Gettext = imports.gettext.domain("gnome-shell-trash-extension");
 const _ = Gettext.gettext;
+
+
+const ScrollableMenu = new Lang.Class({
+  Name: 'ScrollableMenu.ScrollableMenu',
+  Extends: PopupMenu.PopupMenuSection,
+
+  _init: function() {
+    this.parent();
+    let scrollView = new St.ScrollView({
+      x_fill: true,
+      y_fill: false,
+      y_align: St.Align.START,
+      overlay_scrollbars: true,
+      style_class: 'vfade'
+    });
+    this.innerMenu = new PopupMenu.PopupMenuSection();
+    scrollView.add_actor(this.innerMenu.actor);
+    this.actor.add_actor(scrollView);
+  },
+
+  addMenuItem: function(item) {
+    this.innerMenu.addMenuItem(item);
+  },
+
+  removeAll: function() {
+    this.innerMenu.removeAll();
+  }
+});
 
 
 const TrashMenuItem = new Lang.Class({
@@ -68,7 +96,7 @@ const TrashMenu = new Lang.Class({
         this.parent(0.0, _("Trash"));
         this.trashIcon = new St.Icon({ icon_name: 'user-trash-full-symbolic',
                                        style_class: 'popup-menu-icon' })
-      	this.actor.add_actor(this.trashIcon);
+        this.actor.add_actor(this.trashIcon);
 
         this.trash_path = 'trash:///';
         this.trash_file = Gio.file_new_for_uri(this.trash_path);
@@ -97,17 +125,8 @@ const TrashMenu = new Lang.Class({
         this.separator = new PopupMenu.PopupSeparatorMenuItem();
         this.menu.addMenuItem(this.separator);
 
-        // Create scrollable section
-        this.scrollSection = new PopupMenu.PopupMenuSection();
-        let scrollViewMenuSection = new PopupMenu.PopupMenuSection();
-        let trashScrollView = new St.ScrollView({
-            style_class: 'trash-scroll-menu-section',
-            overlay_scrollbars: true
-        });
-        trashScrollView.add_actor(this.scrollSection.actor);
-        scrollViewMenuSection.actor.add_actor(trashScrollView);
-
-        this.menu.addMenuItem(scrollViewMenuSection);
+        this.filesList = new ScrollableMenu();
+        this.menu.addMenuItem(this.filesList);
     },
 
     destroy: function() {
@@ -158,7 +177,7 @@ const TrashMenu = new Lang.Class({
                                      Lang.bind(this, function() {
                                        this._openTrashItem(file_name);
                                      }));
-        this.scrollSection.addMenuItem(item);
+        this.filesList.addMenuItem(item);
         count++;
       }
       children.close(null, null)
@@ -166,12 +185,7 @@ const TrashMenu = new Lang.Class({
     },
 
     _clearMenu: function() {
-      let existing = this.scrollSection._getMenuItems();
-      let i = existing.length - 1;
-      while(i >= 0) {
-        existing[i].destroy();
-        i--;
-      }
+      this.filesList.removeAll();
     },
 
     _openTrashItem: function(file_name) {
