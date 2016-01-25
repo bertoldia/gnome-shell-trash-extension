@@ -1,10 +1,18 @@
 {
-   "shell-version": ["3.16", "3.14", "3.12", "3.10", "3.8", "3.6"],
-   "version": "0.4",
-   "uuid": "gnome-shell-trash-extension",
-   "name": "Trash",
-   "description": "A Trash button for the GNOME shell panel",
-   "url": "https://github.com/bertoldia/gnome-shell-trash-extension",
-   "localedir": "locale",
-   "original-authors": "Axel von Bertoldi"
+    "shell-version": [
+        "3.18",
+        "3.16",
+        "3.14",
+        "3.12",
+        "3.10",
+        "3.8",
+        "3.6"
+    ],
+    "version": "0.4",
+    "uuid": "gnome-shell-trash-extension",
+    "name": "Trash",
+    "description": "A Trash button for the GNOME shell panel",
+    "url": "https://github.com/bertoldia/gnome-shell-trash-extension",
+    "localedir": "locale",
+    "original-authors": "Axel von Bertoldi"
 }
